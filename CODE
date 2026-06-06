@@ -1,0 +1,97 @@
+#include "arduino_secrets.h"
+
+
+
+#include "thingProperties.h"
+#include <DHT.h>
+
+#define DHTPIN 4
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+const int MQ135_PIN = 34;
+
+void setup() {
+
+  Serial.begin(9600);
+  delay(1500);
+
+  
+  dht.begin();
+
+  
+  initProperties();
+
+  
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+
+  Serial.println("Air Quality Monitoring System Started");
+}
+
+void loop() {
+
+  ArduinoCloud.update();
+
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  int aq = analogRead(MQ135_PIN);
+
+  if (isnan(h) || isnan(t)) {
+    Serial.println("Failed to read from DHT11 sensor!");
+    delay(2000);
+    return;
+  }
+
+  // Send values to Arduino Cloud
+  Temperature = t;
+  humidity = h;
+  airquality = aq;
+
+  Serial.println("--------------------------------");
+
+  Serial.print("Temperature: ");
+  Serial.print(t);
+  Serial.println(" °C");
+
+  Serial.print("Humidity: ");
+  Serial.print(h);
+  Serial.println(" %");
+
+  Serial.print("Air Quality Value: ");
+  Serial.println(aq);
+
+  Serial.println("--------------------------------");
+
+  delay(2000);
+}
+
+
+
+void onTemperatureChange() {
+ 
+}
+/*
+  Since Humidity is READ_WRITE variable, onHumidityChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onHumidityChange()  {
+  // Add your code here to act upon Humidity change
+}
+/*
+  Since Airquality is READ_WRITE variable, onAirqualityChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onAirqualityChange()  {
+  // Add your code here to act upon Airquality change
+}
+/*
+  Since Message is READ_WRITE variable, onMessageChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onMessageChange()  {
+  // Add your code here to act upon Message change
+}
